@@ -1,7 +1,9 @@
 "use client";
 
+import { RefreshCw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import { Button, buttonClass } from "@/components/ui/Button";
 
 // Catches anything thrown while rendering a page (e.g. the database being unreachable).
 // In production Next.js strips the real message from server errors, so no stack trace or
@@ -14,23 +16,24 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
   const digest = error instanceof globalThis.Error ? (error as { digest?: string }).digest : undefined;
 
   return (
-    <main className="mx-auto mt-24 max-w-md px-4 text-center">
-      <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <p className="mt-2 text-gray-600">
-        We couldn&apos;t load this page. This is usually temporary, for example the database waking up. Your documents are safe.
-      </p>
-      {digest && <p className="mt-2 text-xs text-gray-500">Reference: {digest}</p>}
-      <div className="mt-6 flex justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => retry()}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Try again
-        </button>
-        <Link href="/" className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">
-          Back to documents
-        </Link>
+    <main id="main" className="grid min-h-screen place-items-center px-4">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
+        <span className="mx-auto grid size-12 place-items-center rounded-full bg-amber-100 text-amber-700">
+          <TriangleAlert size={24} aria-hidden />
+        </span>
+        <h1 className="mt-4 text-xl font-semibold tracking-tight">Something went wrong</h1>
+        <p className="mt-2 text-sm text-zinc-600">
+          We couldn&apos;t load this page. This is usually temporary, for example the database waking up. Your documents are safe.
+        </p>
+        {digest && <p className="mt-2 text-xs text-zinc-500">Reference: {digest}</p>}
+        <div className="mt-6 flex justify-center gap-2">
+          <Button variant="primary" onClick={() => retry()}>
+            <RefreshCw size={15} aria-hidden /> Try again
+          </Button>
+          <Link href="/" className={buttonClass("secondary")}>
+            Back to documents
+          </Link>
+        </div>
       </div>
     </main>
   );

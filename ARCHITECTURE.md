@@ -7,7 +7,8 @@
 | **Next.js (App Router) + TypeScript strict** | Server components and server actions keep data access on the server, next to the permission checks. One deployable unit for Vercel. |
 | **Tiptap (StarterKit)** | A real rich-text editor with a JSON document model, which maps cleanly onto a JSONB column. Tiptap 3's StarterKit already includes Underline, lists, headings and undo/redo. |
 | **Prisma + PostgreSQL (Neon)** | Typed queries, committed migrations, free hosted Postgres for local dev and production. Pinned to Prisma 7.10.1 (the stable line) because npm's `latest` tag pointed at an 8.0 release candidate. |
-| **Tailwind CSS** | Fast, consistent UI with no component library to learn. One light theme. |
+| **Tailwind CSS** | Fast, consistent UI with no component library to learn. One light theme, a small token set (Inter via `next/font`, neutral greys plus one accent blue) and a handful of own primitives in `components/ui` (button, menu, dialog, badge, avatar). |
+| `lucide-react`, `sonner` | Icons (every icon button has a tooltip and an aria-label) and small toast notifications. Validation errors stay inline under their inputs; toasts report outcomes (shared, removed, imported, exported) and unexpected failures. |
 | **Zod** | Every input (forms, JSON bodies, uploads) is validated at the boundary with readable messages. |
 | **Vitest** | Fast tests for the pure logic. |
 | `mammoth`, `marked` | `.docx` and Markdown to HTML, as required. |
@@ -77,7 +78,7 @@ A small extra added after the core features (the main stretch item was roles).
 1. **Access control correctness.** It is the part of this app that can be most wrong, and the easiest to test. One pure module, used by every entry point, with tests.
 2. **Never losing the user's work.** Serialized autosave, a visible status, leave warnings, flush-on-navigate, title saved on blur.
 3. **Robust inputs.** Zod at every boundary, real content checks on uploads, readable errors for empty titles, oversized or corrupt files, unknown users, self-shares and duplicates. Unexpected failures (such as the database being down) become friendly messages (`error.tsx`, guarded actions, JSON errors from routes) with no stack traces.
-4. **Testing the logic, not the framework.** Pure functions were extracted so the important rules (permissions, share and role rules, conversion, title numbering) are tested without a database or browser: 109 tests.
+4. **Testing the logic, not the framework.** Pure functions were extracted so the important rules (permissions, share and role rules, conversion, title numbering) are tested without a database or browser: 122 tests.
 5. **A small, readable codebase** over clever abstractions: short files, no unnecessary dependencies.
 
 ## Deliberate scope cuts

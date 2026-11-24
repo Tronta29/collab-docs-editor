@@ -1,29 +1,26 @@
 "use client";
 
-import { useActionState } from "react";
+import { Plus } from "lucide-react";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/Button";
 import { createDocument } from "@/lib/document-actions";
 
-// On success the action redirects to the new document's editor.
+// One click creates an "Untitled document" (numbered if needed) and opens it; the title is
+// edited inline in the editor. On success the action redirects to the editor.
 export function CreateDocumentForm() {
   const [state, action, pending] = useActionState(createDocument, {});
 
+  useEffect(() => {
+    if (state.error) toast.error(state.error);
+  }, [state]);
+
   return (
-    <form action={action} className="flex flex-wrap items-center gap-2">
-      <input
-        name="title"
-        placeholder="Untitled document"
-        maxLength={200}
-        aria-label="New document title"
-        className="w-64 rounded border border-gray-300 px-3 py-2 text-sm"
-      />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-      >
+    <form action={action}>
+      <Button type="submit" variant="primary" disabled={pending}>
+        <Plus size={16} aria-hidden />
         {pending ? "Creating…" : "New document"}
-      </button>
-      {state.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
+      </Button>
     </form>
   );
 }

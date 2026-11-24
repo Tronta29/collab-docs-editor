@@ -69,7 +69,7 @@ npm run dev            # http://localhost:3000
 ## Tests and checks
 
 ```bash
-npm test               # Vitest, 109 tests, no database needed
+npm test               # Vitest, 122 tests, no database needed
 npm run typecheck
 npm run lint
 npm run build          # applies pending migrations, then builds (needs the database)

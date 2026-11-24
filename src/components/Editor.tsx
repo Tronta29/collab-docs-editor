@@ -2,10 +2,13 @@
 
 import { Placeholder } from "@tiptap/extensions";
 import { type Editor as TiptapEditor, EditorContent, type JSONContent, useEditor } from "@tiptap/react";
+import { Eye } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ExportMenu } from "@/components/ExportMenu";
 import { SaveStatus, type SaveState } from "@/components/SaveStatus";
 import { Toolbar } from "@/components/Toolbar";
+import { Badge } from "@/components/ui/Badge";
 import { editorExtensions } from "@/lib/editor-extensions";
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -51,8 +54,10 @@ export function Editor({ docId, initialContent, readOnly = false }: { docId: str
       setErrorMessage("");
       setState("saved");
     } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "Couldn't reach the server.");
+      const message = e instanceof Error ? e.message : "Couldn't reach the server.";
+      setErrorMessage(message);
       setState("error");
+      toast.error(message);
     } finally {
       inFlight.current = false;
     }
@@ -116,29 +121,35 @@ export function Editor({ docId, initialContent, readOnly = false }: { docId: str
     };
   }, [save]);
 
-  if (!editor) return <div className="h-64 rounded border border-gray-200 bg-white" />;
+  if (!editor) return <div className="mx-auto mt-6 h-96 max-w-[816px] rounded-md bg-white shadow-md" />;
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-end gap-3 print:hidden">
-        <ExportMenu docId={docId} beforeDownload={readOnly ? undefined : flushPending} />
-        {readOnly ? (
-          <span className="rounded-full bg-gray-200 px-3 py-0.5 text-sm font-medium text-gray-700">View only</span>
-        ) : (
-          <SaveStatus state={state} errorMessage={errorMessage} onRetry={() => void save()} />
-        )}
+      {/* Sticky bar: formatting on the left; save status and export on the right. */}
+      <div className="sticky top-14 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur print:hidden">
+        <div className="mx-auto flex min-h-11 max-w-[816px] items-center justify-between gap-3 px-3 py-1.5">
+          {readOnly ? (
+            <Badge icon={<Eye size={13} aria-hidden />}>View only</Badge>
+          ) : (
+            <Toolbar editor={editor} />
+          )}
+          <div className="flex shrink-0 items-center gap-3">
+            {!readOnly && <SaveStatus state={state} errorMessage={errorMessage} onRetry={() => void save()} />}
+            <ExportMenu docId={docId} beforeDownload={readOnly ? undefined : flushPending} />
+          </div>
+        </div>
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
-        {!readOnly && <Toolbar editor={editor} />}
-        {/* Clicking the empty space around the text (not the text itself) focuses the end. */}
-        <div
-          className={readOnly ? "" : "cursor-text"}
+
+      <div className="px-3 py-6 sm:py-8 print:p-0">
+        <article
+          className={`mx-auto max-w-[816px] rounded-md bg-white shadow-md ring-1 ring-zinc-200/70 print:max-w-none print:rounded-none print:shadow-none print:ring-0 ${readOnly ? "" : "cursor-text"}`}
           onClick={(e) => {
+            // Clicking the empty space around the text (not the text itself) focuses the end.
             if (!readOnly && e.target === e.currentTarget) editor.commands.focus("end");
           }}
         >
           <EditorContent editor={editor} />
-        </div>
+        </article>
       </div>
     </div>
   );

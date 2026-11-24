@@ -30,10 +30,10 @@
 | `src/app/api/documents/[id]/export/route.ts` | Markdown export endpoint (`GET`) |
 | `src/app/layout.tsx`, `globals.css`, `favicon.ico` | Layout, light theme, editor content styles |
 | `src/app/error.tsx`, `global-error.tsx`, `not-found.tsx` | Friendly error and 404 pages |
-| `src/components/` | `Editor`, `Toolbar`, `SaveStatus`, `TitleForm`, `ShareDialog`, `ExportMenu`, `ImportForm`, `CreateDocumentForm`, `DocumentLists`, `OwnerActions`, `Header` |
+| `src/components/` | `Editor`, `Toolbar`, `SaveStatus`, `TitleForm`, `ShareDialog`, `ExportMenu`, `ImportForm`, `CreateDocumentForm`, `DocumentLists`, `DocumentRow`, `DocIcon`, `RelativeTime`, `Header`, `UserMenu`, plus `ui/` primitives (`Button`, `IconButton`, `Menu`, `ConfirmDialog`, `Badge`, `Avatar`, `AppToaster`, `usePopover`) |
 | `src/lib/permissions.ts` | All access rules, including roles (pure) |
 | `src/lib/sharing.ts` | Share / change-role / unshare validation (pure) |
-| `src/lib/titles.ts` | Title numbering (pure) |
+| `src/lib/titles.ts`, `time.ts`, `initials.ts` | Title numbering, relative time ("5 min ago") and avatar initials (pure) |
 | `src/lib/import/convert.ts`, `limits.ts` | Import conversion (pure) and limits |
 | `src/lib/export/markdown.ts`, `filename.ts` | Markdown export and safe download file names (pure) |
 | `src/lib/auth.ts`, `db.ts`, `documents.ts` | Current user from cookie, Prisma client, access-checked data loading |
@@ -41,7 +41,7 @@
 | `src/lib/schemas.ts`, `editor-extensions.ts` | Zod schemas, shared Tiptap extension list |
 
 ### Tests
-`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, `export.test.ts`, plus `vitest.config.mts`: 109 tests, no database required.
+`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, `export.test.ts`, `ui-helpers.test.ts`, plus `vitest.config.mts`: 122 tests, no database required.
 
 ### Samples
 `samples/sample.txt`, `samples/sample.md`, `samples/sample.docx`: files to try the import with.
@@ -62,7 +62,7 @@
 - The optional stretch item: **viewer/editor roles**. Also added as a small extra: **export**, either *Markdown (.md)* (downloaded from the server, viewers included) or *PDF (print)* via the browser's print dialog with a clean print layout.
 - Zod validation on all inputs, with clear messages for empty titles, oversized or corrupt files, unknown users, self-shares and duplicate shares.
 - Friendly error and 404 pages; database failures show a readable message instead of a stack trace.
-- 109 passing tests, type check, lint and production build all clean.
+- 122 passing tests, type check, lint and production build all clean.
 
 ## What is incomplete or limited
 

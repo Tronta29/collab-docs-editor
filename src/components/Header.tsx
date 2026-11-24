@@ -1,24 +1,27 @@
+import { FileText } from "lucide-react";
 import Link from "next/link";
-import { signOut } from "@/lib/actions";
+import { UserMenu } from "@/components/UserMenu";
 import type { CurrentUser } from "@/lib/auth";
+
+export function BrandMark() {
+  return (
+    <span className="flex items-center gap-2.5 font-semibold tracking-tight text-zinc-900">
+      <span className="grid size-8 place-items-center rounded-lg bg-accent text-white shadow-sm">
+        <FileText size={18} aria-hidden />
+      </span>
+      Docs
+    </span>
+  );
+}
 
 export function Header({ user }: { user: CurrentUser }) {
   return (
-    <header className="border-b border-gray-200 bg-white text-gray-900 print:hidden">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-semibold">
-          Docs
+    <header className="sticky top-0 z-30 h-14 border-b border-zinc-200 bg-white/90 backdrop-blur print:hidden">
+      <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-4">
+        <Link href="/" aria-label="Docs, all documents" className="rounded-lg">
+          <BrandMark />
         </Link>
-        <div className="flex items-center gap-3 text-sm">
-          <span>
-            {user.name} <span className="text-gray-600">({user.email})</span>
-          </span>
-          <form action={signOut}>
-            <button type="submit" className="rounded border border-gray-300 bg-white px-2 py-1 text-gray-800 hover:bg-gray-100">
-              Switch user
-            </button>
-          </form>
-        </div>
+        <UserMenu name={user.name} email={user.email} />
       </div>
     </header>
   );

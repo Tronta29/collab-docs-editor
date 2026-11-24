@@ -40,7 +40,7 @@ These were requests I made beyond, or against, what the AI first produced:
 
 ## How I verified the work
 
-- **Unit tests (Vitest, 109):** permissions (owner / editor / viewer / stranger for every function), import conversion (txt, markdown, a real `.docx` fixture, unsafe HTML, bad and corrupt files), share and role validation (self-share, duplicate, unknown user, non-owner, role changes, invalid roles) title numbering, and the Markdown export (headings, bold/italic, lists, underline handling, safe file names).
+- **Unit tests (Vitest, 122):** permissions (owner / editor / viewer / stranger for every function), import conversion (txt, markdown, a real `.docx` fixture, unsafe HTML, bad and corrupt files), share and role validation (self-share, duplicate, unknown user, non-owner, role changes, invalid roles) title numbering, and the Markdown export (headings, bold/italic, lists, underline handling, safe file names).
 - **Tests that found real bugs in AI-written code:** underlined text was silently lost on `.docx` import (mammoth ignores underline by default), and inline `<script>` in Markdown left its code behind as visible text. Both were fixed.
 - **`curl` checks of status codes and permissions:** 200 / 401 / 404 / 400 / 413 / 415 for pages and the autosave and import endpoints, as owner, shared user, stranger and signed-out. Also a production build run against an unreachable database to confirm no stack trace or connection detail reaches the browser.
 - **A manual browser checklist per phase,** run by me.
