@@ -1,0 +1,6 @@
+Meeting notes
+
+This is a plain text file. Blank lines separate paragraphs.
+A single line break stays inside the same paragraph.
+
+Special characters are kept as text, not interpreted: <b>not bold</b> & "quotes".

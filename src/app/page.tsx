@@ -1,6 +1,7 @@
 import { CreateDocumentForm } from "@/components/CreateDocumentForm";
 import { DocumentLists } from "@/components/DocumentLists";
 import { Header } from "@/components/Header";
+import { ImportForm } from "@/components/ImportForm";
 import { requireUser } from "@/lib/auth";
 import { listDocumentsForUser } from "@/lib/documents";
 
@@ -12,7 +13,10 @@ export default async function Home() {
     <>
       <Header user={user} />
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <CreateDocumentForm />
+        <div className="space-y-4">
+          <CreateDocumentForm />
+          <ImportForm />
+        </div>
         <DocumentLists mine={mine} shared={shared} />
       </main>
     </>

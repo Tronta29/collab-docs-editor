@@ -30,6 +30,10 @@ export const deleteDocumentSchema = z.object({
   id: z.string().min(1),
 });
 
+export const importFileSchema = z.object({
+  file: z.instanceof(File, { message: "Choose a file to import." }),
+});
+
 export const MAX_CONTENT_BYTES = 1_000_000;
 
 // Structural check only: a Tiptap doc node whose children are typed nodes. The editor's
