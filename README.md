@@ -2,7 +2,7 @@
 
 A small Google Docs-style app: create and edit rich-text documents in the browser, import `.txt` / `.md` / `.docx` files, and share documents with other users by email as **Editor** or **Viewer**.
 
-**Live demo:** `TODO: add Vercel URL`
+**Live demo:** https://collab-docs-editor29.vercel.app/
 
 Built with Next.js (App Router), TypeScript (strict), Tiptap, Prisma + PostgreSQL (Neon), Tailwind CSS, Zod and Vitest.
 
@@ -27,6 +27,7 @@ The seed data gives Alice two documents and Bob one private document. Alice's **
 5. Click **Switch user** and sign in as **Bob**. The document is under **Shared with me** with an *Editor* badge and Alice as owner. Bob can edit it but cannot rename, share or delete it.
 6. Sign in as **Carol**. The same document shows a *Viewer* badge. It opens read-only ("View only", no toolbar, nothing is saved), and the server rejects writes from her.
 7. Back as **Alice**, remove Carol from the **Share** panel. As Carol, reload the document URL: you get a 404, never the data.
+8. Open any document and try **Export**: *Markdown (.md)* downloads `<title>.md`; *PDF (print)* opens the print dialog showing only the title and content.
 
 ## Features
 
@@ -35,6 +36,7 @@ The seed data gives Alice two documents and Bob one private document. Alice's **
 - Autosave 1.5 s after you stop typing, with a visible *Saving… / Saved / Error (retry)* status and a warning before leaving with unsaved changes.
 - File import into a **new** document: `.txt`, `.md`, `.docx`, **max 2 MB**. Anything else is rejected with a clear message (wrong type, empty file, corrupt file, too large).
 - Sharing by email with **roles**. One owner per document. *Editors* can view and edit content; *Viewers* can only read (read-only editor, no toolbar, writes rejected by the server with 403). Only the owner can rename, share, change roles, remove people or delete. Users without access get a 404.
+- **Export** from the editor: *Markdown (.md)* downloads the document as `<title>.md` (viewers can export too; pending edits are saved first), and *PDF (print)* opens the browser's print dialog with a clean print layout (just the title and content): choose "Save as PDF". Tip: turn off "Headers and footers" in the print dialog for a cleaner page.
 - Duplicate titles on create/import are numbered like Google Drive: `sample`, `sample (2)`, `sample (3)`.
 
 ## Local setup
@@ -67,14 +69,14 @@ npm run dev            # http://localhost:3000
 ## Tests and checks
 
 ```bash
-npm test               # Vitest, 88 tests, no database needed
+npm test               # Vitest, 109 tests, no database needed
 npm run typecheck
 npm run lint
 npm run build          # applies pending migrations, then builds (needs the database)
 npm run build:app      # build only, no migrations
 ```
 
-The tests cover the pure logic: permissions (owner / editor / viewer / stranger), file-import conversion (including a real `.docx` fixture and rejection of bad input), share and role-change validation, and title numbering.
+The tests cover the pure logic: permissions (owner / editor / viewer / stranger), file-import conversion (including a real `.docx` fixture and rejection of bad input), share and role-change validation, title numbering, and the Markdown export.
 
 ## Deploy to Vercel + Neon
 

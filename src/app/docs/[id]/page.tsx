@@ -20,11 +20,13 @@ export default async function DocumentPage({ params }: PageProps<"/docs/[id]">) 
   return (
     <>
       <Header user={user} />
-      <main className="mx-auto max-w-4xl px-4 py-6">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">
+      <main className="mx-auto max-w-4xl px-4 py-6 print:max-w-none print:p-0">
+        <Link href="/" className="text-sm text-blue-600 hover:underline print:hidden">
           ← All documents
         </Link>
-        <div className="my-4 flex items-start justify-between gap-4">
+        {/* Printing shows only this plain title and the content (the editable title form is hidden). */}
+        <h1 className="mb-4 hidden text-3xl font-bold print:block">{doc.title}</h1>
+        <div className="my-4 flex items-start justify-between gap-4 print:hidden">
           <div className="min-w-0 flex-1">
             {canRename(user, doc) ? (
               <TitleForm id={doc.id} title={doc.title} />

@@ -3,6 +3,7 @@
 import { Placeholder } from "@tiptap/extensions";
 import { type Editor as TiptapEditor, EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ExportMenu } from "@/components/ExportMenu";
 import { SaveStatus, type SaveState } from "@/components/SaveStatus";
 import { Toolbar } from "@/components/Toolbar";
 import { editorExtensions } from "@/lib/editor-extensions";
@@ -86,6 +87,15 @@ export function Editor({ docId, initialContent, readOnly = false }: { docId: str
     },
   });
 
+  // Used before a Markdown export: send pending edits now and report whether they were saved.
+  const flushPending = useCallback(async () => {
+    clearTimeout(timer.current);
+    timer.current = undefined;
+    while (inFlight.current) await new Promise((r) => setTimeout(r, 100));
+    if (version.current !== savedVersion.current) await save();
+    return version.current === savedVersion.current;
+  }, [save]);
+
   // Warn before closing/reloading the tab while there is anything not yet saved.
   useEffect(() => {
     if (state === "saved") return;
@@ -110,14 +120,15 @@ export function Editor({ docId, initialContent, readOnly = false }: { docId: str
 
   return (
     <div>
-      <div className="mb-2 flex justify-end">
+      <div className="mb-2 flex items-center justify-end gap-3 print:hidden">
+        <ExportMenu docId={docId} beforeDownload={readOnly ? undefined : flushPending} />
         {readOnly ? (
           <span className="rounded-full bg-gray-200 px-3 py-0.5 text-sm font-medium text-gray-700">View only</span>
         ) : (
           <SaveStatus state={state} errorMessage={errorMessage} onRetry={() => void save()} />
         )}
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
         {!readOnly && <Toolbar editor={editor} />}
         {/* Clicking the empty space around the text (not the text itself) focuses the end. */}
         <div

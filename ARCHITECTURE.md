@@ -11,6 +11,7 @@
 | **Zod** | Every input (forms, JSON bodies, uploads) is validated at the boundary with readable messages. |
 | **Vitest** | Fast tests for the pure logic. |
 | `mammoth`, `marked` | `.docx` and Markdown to HTML, as required. |
+| `turndown` | HTML to Markdown for the Markdown export. Runs on the server (it brings its own small DOM), no browser needed. |
 
 ## Data model
 
@@ -62,17 +63,26 @@ Autosave (`components/Editor.tsx`):
 
 The API route (`POST /api/documents/import`) only does auth, upload parsing and persistence. New documents are always owned by the current user.
 
+## Export
+
+A small extra added after the core features (the main stretch item was roles).
+
+- **Markdown:** `GET /api/documents/[id]/export?format=md`. It loads the document through the same access-checked function as the editor page, so anyone who can view it (viewers included) can export it and strangers get the same 404. `lib/export/markdown.ts` is pure: Tiptap JSON to HTML with `generateHTML` and the **same extension list as the editor and importer**, then HTML to Markdown with `turndown`. The file is named from the title by `safeFileName` (no path separators, reserved characters or control characters, length-capped) and sent with both an ASCII `filename` and a UTF-8 `filename*`, so Turkish and other non-ASCII titles survive.
+- **Underline:** Markdown has no underline. It is exported as inline HTML (`<u>…</u>`), which GitHub and most renderers display, so the formatting is not lost silently. Our own Markdown importer drops raw HTML but keeps the text, so re-importing an export loses only the underline.
+- **Fresh content:** the export reads what is saved on the server, so the editor first flushes pending autosave edits and cancels the export with a message if that save fails. Viewers have nothing to flush.
+- **PDF:** no server library. "PDF (print)" calls `window.print()`; a print stylesheet (`print:hidden` on the app chrome plus a small `@media print` block) leaves only the title and content on clean white pages, and the user picks "Save as PDF". The trade-off: pagination, fonts and the optional browser header/footer are the browser's, not ours.
+
 ## What I prioritized, and why
 
 1. **Access control correctness.** It is the part of this app that can be most wrong, and the easiest to test. One pure module, used by every entry point, with tests.
 2. **Never losing the user's work.** Serialized autosave, a visible status, leave warnings, flush-on-navigate, title saved on blur.
 3. **Robust inputs.** Zod at every boundary, real content checks on uploads, readable errors for empty titles, oversized or corrupt files, unknown users, self-shares and duplicates. Unexpected failures (such as the database being down) become friendly messages (`error.tsx`, guarded actions, JSON errors from routes) with no stack traces.
-4. **Testing the logic, not the framework.** Pure functions were extracted so the important rules (permissions, share and role rules, conversion, title numbering) are tested without a database or browser: 88 tests.
+4. **Testing the logic, not the framework.** Pure functions were extracted so the important rules (permissions, share and role rules, conversion, title numbering) are tested without a database or browser: 109 tests.
 5. **A small, readable codebase** over clever abstractions: short files, no unnecessary dependencies.
 
 ## Deliberate scope cuts
 
-Not built, as agreed: real-time multi-user editing, comments, real authentication, version history, folders, mobile-specific layouts. The one optional stretch item was **viewer/editor roles** (built, see above); Markdown export was not built.
+Not built, as agreed: real-time multi-user editing, comments, real authentication, version history, folders, mobile-specific layouts. The one optional stretch item was **viewer/editor roles** (built, see above). Export (Markdown and print-to-PDF) was added afterwards as a small extra; roles are the main stretch item.
 
 Also left out on purpose: soft delete / trash, search and pagination, invitations to people without an account, ownership transfer.
 
@@ -88,13 +98,14 @@ Also left out on purpose: soft delete / trash, search and pagination, invitation
 - **Title uniqueness is cosmetic.** Numbering (`sample (2)`) is applied on create/import only and is not enforced in the database, so two simultaneous imports could still get the same title. Renaming deliberately allows duplicates.
 - **Sharing reveals which emails exist** (to the owner, who is signed in), because the spec asks for a clear "unknown user" error. The share panel also hard-codes the three demo emails as a hint.
 - **Only two roles.** There is no per-person "can comment" or "can share" level, and editors can't see who else has access.
+- **Export is basic.** Markdown keeps headings, bold, italic, links, line breaks and lists; underline is kept as `<u>`. There is no DOCX export, and PDF comes from the browser's print dialog (no server-rendered PDF, so page breaks and the browser's header/footer are outside our control).
 - **Seed is destructive** (it clears users and documents first) and is meant for demo setup only.
 
 ## What I would build next with 2-4 more hours
 
 1. **Safer concurrent editing:** an `updatedAt`/version check on save that returns 409 and prompts to reload, or Yjs for real-time editing.
 2. **Real authentication** (Auth.js or iron-session with signed, encrypted cookies) replacing the mock cookie.
-3. **Markdown export** (Tiptap JSON to Markdown) and a download button.
-4. **Integration tests** for the server actions and API routes against a test database, plus a Playwright smoke test of the reviewer path.
-5. **Import hardening:** cap the uncompressed size of `.docx`, support images and tables in the schema, stream large uploads.
-6. **Dashboard polish:** search, sorting, pagination, a trash with undo for deletes, and live "who has this open" hints.
+   Also: a server-rendered PDF and DOCX export for exact page layout.
+3. **Integration tests** for the server actions and API routes against a test database, plus a Playwright smoke test of the reviewer path.
+4. **Import hardening:** cap the uncompressed size of `.docx`, support images and tables in the schema, stream large uploads.
+5. **Dashboard polish:** search, sorting, pagination, a trash with undo for deletes, and live "who has this open" hints.

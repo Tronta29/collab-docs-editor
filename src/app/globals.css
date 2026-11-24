@@ -53,3 +53,35 @@
   color: #9ca3af; /* gray-400 */
   pointer-events: none;
 }
+
+/* "Export > PDF (print)": window.print() with only the title and the document on clean white
+   pages. The app chrome (header, toolbar, buttons, status) is hidden with Tailwind's
+   `print:hidden` in the components; this block handles the document itself. */
+@media print {
+  @page {
+    margin: 18mm;
+  }
+  body {
+    background: #fff;
+  }
+  .doc-content {
+    min-height: 0;
+    padding: 0;
+  }
+  .doc-content h1,
+  .doc-content h2,
+  .doc-content h3 {
+    break-after: avoid;
+  }
+  .doc-content li,
+  .doc-content p {
+    orphans: 3;
+    widows: 3;
+  }
+  .doc-content a {
+    color: inherit; /* links print as plain underlined text */
+  }
+  .ProseMirror p.is-editor-empty::before {
+    display: none;
+  }
+}

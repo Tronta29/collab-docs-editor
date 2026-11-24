@@ -14,7 +14,7 @@
 1. **Phased plan, agreed up front.** Phase 0 was a proposal only (folder structure, Prisma schema, phase plan). I approved it before any code was written. Then: setup/schema/seed/mock auth, dashboard, editor + autosave, file import, sharing, and a final quality + docs pass.
 2. **Stop after every phase.** Each phase ended with a report: what was built, commands to run, a manual checklist, and decisions I should know about.
 3. **I tested every phase in the browser before committing.** One commit per phase, plus separate commits for follow-up fixes. I did not let the AI commit ahead of my verification.
-4. **Scope control.** The out-of-scope list was given to the AI at the start and repeated in the plan. The stretch item was held back until the six phases were done and verified, then built as a separate step: viewer/editor roles (Markdown export was not built). `TODO(Derviş): confirm this, and note why you chose roles over Markdown export.`
+4. **Scope control.** The out-of-scope list was given to the AI at the start and repeated in the plan. The stretch item was held back until the six phases were done and verified, then built as a separate step: viewer/editor roles (Markdown export and print-to-PDF were added afterwards as a small extra). `TODO(Derviş): confirm this, and note why you chose roles over Markdown export.`
 
 `TODO(Derviş): add roughly how long each phase took you (prompting + reviewing + testing) and the total.`
 
@@ -40,7 +40,7 @@ These were requests I made beyond, or against, what the AI first produced:
 
 ## How I verified the work
 
-- **Unit tests (Vitest, 88):** permissions (owner / editor / viewer / stranger for every function), import conversion (txt, markdown, a real `.docx` fixture, unsafe HTML, bad and corrupt files), share and role validation (self-share, duplicate, unknown user, non-owner, role changes, invalid roles) and title numbering.
+- **Unit tests (Vitest, 109):** permissions (owner / editor / viewer / stranger for every function), import conversion (txt, markdown, a real `.docx` fixture, unsafe HTML, bad and corrupt files), share and role validation (self-share, duplicate, unknown user, non-owner, role changes, invalid roles) title numbering, and the Markdown export (headings, bold/italic, lists, underline handling, safe file names).
 - **Tests that found real bugs in AI-written code:** underlined text was silently lost on `.docx` import (mammoth ignores underline by default), and inline `<script>` in Markdown left its code behind as visible text. Both were fixed.
 - **`curl` checks of status codes and permissions:** 200 / 401 / 404 / 400 / 413 / 415 for pages and the autosave and import endpoints, as owner, shared user, stranger and signed-out. Also a production build run against an unreachable database to confirm no stack trace or connection detail reaches the browser.
 - **A manual browser checklist per phase,** run by me.

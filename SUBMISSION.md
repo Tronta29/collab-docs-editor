@@ -1,6 +1,6 @@
 # Submission
 
-- **Live URL:** `TODO: add Vercel URL`
+- **Live URL:** https://collab-docs-editor29.vercel.app/
 - **Walkthrough video:** see [`VIDEO_URL.txt`](VIDEO_URL.txt) (`TODO: add link`)
 - **Demo accounts:** alice@demo.com, bob@demo.com, carol@demo.com (no password, "Sign in as…")
 
@@ -27,19 +27,21 @@
 | `src/app/docs/[id]/page.tsx` | Editor page |
 | `src/app/api/documents/[id]/route.ts` | Autosave endpoint (`PATCH`) |
 | `src/app/api/documents/import/route.ts` | File import endpoint (`POST`) |
+| `src/app/api/documents/[id]/export/route.ts` | Markdown export endpoint (`GET`) |
 | `src/app/layout.tsx`, `globals.css`, `favicon.ico` | Layout, light theme, editor content styles |
 | `src/app/error.tsx`, `global-error.tsx`, `not-found.tsx` | Friendly error and 404 pages |
-| `src/components/` | `Editor`, `Toolbar`, `SaveStatus`, `TitleForm`, `ShareDialog`, `ImportForm`, `CreateDocumentForm`, `DocumentLists`, `OwnerActions`, `Header` |
+| `src/components/` | `Editor`, `Toolbar`, `SaveStatus`, `TitleForm`, `ShareDialog`, `ExportMenu`, `ImportForm`, `CreateDocumentForm`, `DocumentLists`, `OwnerActions`, `Header` |
 | `src/lib/permissions.ts` | All access rules, including roles (pure) |
 | `src/lib/sharing.ts` | Share / change-role / unshare validation (pure) |
 | `src/lib/titles.ts` | Title numbering (pure) |
 | `src/lib/import/convert.ts`, `limits.ts` | Import conversion (pure) and limits |
+| `src/lib/export/markdown.ts`, `filename.ts` | Markdown export and safe download file names (pure) |
 | `src/lib/auth.ts`, `db.ts`, `documents.ts` | Current user from cookie, Prisma client, access-checked data loading |
 | `src/lib/actions.ts`, `document-actions.ts`, `sharing-actions.ts`, `action-guard.ts`, `action-state.ts` | Server actions (all Zod-validated and permission-checked) |
 | `src/lib/schemas.ts`, `editor-extensions.ts` | Zod schemas, shared Tiptap extension list |
 
 ### Tests
-`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, plus `vitest.config.mts`: 88 tests, no database required.
+`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, `export.test.ts`, plus `vitest.config.mts`: 109 tests, no database required.
 
 ### Samples
 `samples/sample.txt`, `samples/sample.md`, `samples/sample.docx`: files to try the import with.
@@ -57,10 +59,10 @@
 - Import `.txt`, `.md`, `.docx` (max 2 MB) into a new document, with type, content, size and empty-file checks and sanitization.
 - Mock sign-in with three seeded users; the current user always comes from an httpOnly cookie on the server.
 - Sharing by email with **Viewer / Editor roles**: role dropdown when sharing, an access list where the owner can change a role or Remove; viewers get a read-only editor (and a 403 from the API if they try to write); owner-only rename/share/delete; "Shared with me" shows your role; strangers get 404.
-- The optional stretch item: **viewer/editor roles** (Markdown export was not built).
+- The optional stretch item: **viewer/editor roles**. Also added as a small extra: **export**, either *Markdown (.md)* (downloaded from the server, viewers included) or *PDF (print)* via the browser's print dialog with a clean print layout.
 - Zod validation on all inputs, with clear messages for empty titles, oversized or corrupt files, unknown users, self-shares and duplicate shares.
 - Friendly error and 404 pages; database failures show a readable message instead of a stack trace.
-- 88 passing tests, type check, lint and production build all clean.
+- 109 passing tests, type check, lint and production build all clean.
 
 ## What is incomplete or limited
 
@@ -70,4 +72,4 @@ See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; l
 
 ## What is next
 
-With 2-4 more hours: safer concurrent editing (version check or Yjs), real authentication, Markdown export, integration/E2E tests, and import hardening. Details are in `ARCHITECTURE.md`.
+With 2-4 more hours: safer concurrent editing (version check or Yjs), real authentication, a server-rendered PDF/DOCX export, integration/E2E tests, and import hardening. Details are in `ARCHITECTURE.md`.

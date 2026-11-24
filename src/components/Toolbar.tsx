@@ -56,7 +56,7 @@ export function Toolbar({ editor }: { editor: Editor }) {
   const run = () => editor.chain().focus();
 
   return (
-    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap items-center gap-0.5 border-b border-gray-200 bg-gray-50 p-2 text-gray-800">
+    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap items-center gap-0.5 border-b border-gray-200 bg-gray-50 p-2 text-gray-800 print:hidden">
       <ToolbarButton label={<strong>B</strong>} title="Bold" active={s.bold} onClick={() => run().toggleBold().run()} />
       <ToolbarButton label={<em>I</em>} title="Italic" active={s.italic} onClick={() => run().toggleItalic().run()} />
       <ToolbarButton label={<u>U</u>} title="Underline" active={s.underline} onClick={() => run().toggleUnderline().run()} />

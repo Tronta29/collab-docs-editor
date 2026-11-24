@@ -4,7 +4,7 @@ import type { CurrentUser } from "@/lib/auth";
 
 export function Header({ user }: { user: CurrentUser }) {
   return (
-    <header className="border-b border-gray-200 bg-white text-gray-900">
+    <header className="border-b border-gray-200 bg-white text-gray-900 print:hidden">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <Link href="/" className="text-lg font-semibold">
           Docs
