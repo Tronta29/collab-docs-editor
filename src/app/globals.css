@@ -42,10 +42,12 @@
 .doc-content u { text-decoration: underline; }
 .doc-content a { color: #2563eb; text-decoration: underline; }
 
-/* "Start writing…" placeholder, shown only while the document is a single empty paragraph.
-   CSS-only so we don't need the extra @tiptap/extension-placeholder dependency. */
-.doc-content > p:only-child:has(> br:only-child)::before {
-  content: "Start writing…";
+/* "Start writing…" placeholder. Tiptap's Placeholder extension adds `is-editor-empty` (and the
+   data-placeholder text) to the first paragraph only while the WHOLE editor is empty, so this
+   is the only rule that may show it. Don't match on DOM shape: a paragraph with text can still
+   contain a trailing <br>, which made a shape-based selector draw the placeholder over the text. */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
   float: left;
   height: 0;
   color: #9ca3af; /* gray-400 */

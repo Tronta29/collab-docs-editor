@@ -19,6 +19,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@tiptap/extensions": "^3.35.0",
     "@tiptap/html": "^3.35.0",
     "@tiptap/pm": "^3.35.0",
     "@tiptap/react": "^3.35.0",

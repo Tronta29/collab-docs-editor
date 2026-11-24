@@ -1,5 +1,6 @@
 "use client";
 
+import { Placeholder } from "@tiptap/extensions";
 import { type Editor as TiptapEditor, EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SaveStatus, type SaveState } from "@/components/SaveStatus";
@@ -62,7 +63,11 @@ export function Editor({ docId, initialContent }: { docId: string; initialConten
   }, [save]);
 
   const editor = useEditor({
-    extensions: editorExtensions,
+    // Placeholder is editor-only (it doesn't change the document schema), so it is not part of
+    // the shared list the importer uses. Keep the default `showOnlyCurrent`: with `false` the
+    // extension reads `editor.isEmpty` one transaction late, so the placeholder wouldn't come
+    // back right after the last character is deleted.
+    extensions: [...editorExtensions, Placeholder.configure({ placeholder: "Start writing…" })],
     content: initialContent,
     immediatelyRender: false, // avoids an SSR hydration mismatch
     editorProps: { attributes: { class: "doc-content", "aria-label": "Document content" } },
