@@ -68,7 +68,7 @@
 
 See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; last write wins with no real-time updates; content limit of 1 MB (so some large imports are refused); images and tables are dropped on import; no zip-bomb protection; title numbering is cosmetic and not enforced under races.
 
-The live deployment was checked in the browser: migrations are applied and the seed has been run once. Not verified: mobile/tablet layouts and very large documents.
+The live deployment was checked in the browser: migrations are applied and the seed has been run. Not verified: phone widths (below ~640 px) and very large documents. Tablet width (820 px) was checked via screenshots.
 
 ## What is next
 

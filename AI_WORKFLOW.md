@@ -29,7 +29,7 @@ No other AI tools were used.
 | Viewer/editor roles | ~12 min |
 | Markdown export + print-to-PDF | ~16 min |
 | UI polish | ~17 min |
-| **Total** | **~2.5 hours** |
+| **Total** | **~2 h 15 min** |
 
 ## Where I changed or corrected the AI's output
 
@@ -52,7 +52,7 @@ Deployment decisions I made myself: I declined Vercel's paid team plan (the brie
 - **Removed the extra Underline extension.** Tiptap 3's StarterKit already includes Underline, so adding `@tiptap/extension-underline` again would register it twice.
 - **Disabled `cacheComponents`.** The Next.js template enables it, but every page here depends on the signed-in user's cookie, so there is nothing to prerender or cache, and it would force Suspense boundaries around every cookie read.
 - **Same 404 for "not found" and "no access".** A stranger cannot tell whether a document exists. I accepted this.
-- **Ownership checked before email lookup when sharing.** A non-owner cannot use the share form to probe which emails are registered.
+- **Ownership checked first when sharing.** Ownership is checked before the lookup result is revealed, so a non-owner never learns whether an email is registered.
 - **1 MB content cap with a 2 MB file cap.** A 2 MB text file can exceed 1 MB once converted to editor JSON, which would have produced a document that can never be saved; import now refuses it with a clear message. I accepted this and listed it as a known limitation.
 - **Used the local Next.js docs.** This Next.js version differs from what the model remembers (for example error boundaries receive `retry`, not `reset`); the template's `AGENTS.md` tells the agent to read `node_modules/next/dist/docs/` first.
 
@@ -69,9 +69,10 @@ Deployment decisions I made myself: I declined Vercel's paid team plan (the brie
 - **`curl` checks of status codes and permissions:** 200 / 401 / 403 / 404 / 400 / 413 / 415 for pages and the autosave, import and export endpoints, as owner, editor, viewer, stranger and signed-out. Also a production build run against an unreachable database to confirm no stack trace or connection detail reaches the browser.
 - **Headless-browser checks by Claude Code** for flows that `curl` cannot reach (sharing panel, viewer mode, export, print layout).
 - **A manual browser checklist per phase,** run by me in Chrome, locally and on the deployed site.
-- Type check, lint and a production build before every commit.
+- Type check, lint and tests before every commit; a production build before deploys and most phase commits.
+- The final docs were cross-checked by Claude Code against the code itself; it found five inaccuracies (a time total, an overstated build claim, the order of the ownership check, tablet vs phone testing, and seed wording), which I corrected.
 
-**What I did not verify:** mobile and tablet layouts, and very large documents. Local development and production also share one Neon database. With more time I would add Playwright end-to-end tests across Chromium, Firefox and WebKit with mobile viewports, a test with a near-limit document to check editor performance and autosave, and a separate Neon branch for development.
+**What I did not verify:** phone widths (below ~640 px) and very large documents. Tablet width (820 px) was checked via screenshots. Local development and production also share one Neon database. With more time I would add Playwright end-to-end tests across Chromium, Firefox and WebKit with mobile viewports, a test with a near-limit document to check editor performance and autosave, and a separate Neon branch for development.
 
 ## Things that went wrong along the way
 
