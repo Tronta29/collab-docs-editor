@@ -30,6 +30,21 @@ export const deleteDocumentSchema = z.object({
   id: z.string().min(1),
 });
 
+export const shareDocumentSchema = z.object({
+  documentId: z.string().min(1),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Enter an email address.")
+    .toLowerCase()
+    .pipe(z.email("Enter a valid email address.")),
+});
+
+export const unshareDocumentSchema = z.object({
+  documentId: z.string().min(1),
+  userId: z.string().min(1),
+});
+
 export const importFileSchema = z.object({
   file: z.instanceof(File, { message: "Choose a file to import." }),
 });

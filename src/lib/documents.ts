@@ -25,7 +25,8 @@ export async function getDocumentForUser(user: CurrentUser, id: string): Promise
   return canView(user, doc) ? doc : null;
 }
 
-export type DocumentWithContent = LoadedDocument & { content: unknown; ownerName: string };
+export type Collaborator = { id: string; name: string; email: string };
+export type DocumentWithContent = LoadedDocument & { content: unknown; ownerName: string; collaborators: Collaborator[] };
 
 /** Same access rule as getDocumentForUser, but also loads the content (for the editor page). */
 export async function getDocumentWithContent(user: CurrentUser, id: string): Promise<DocumentWithContent | null> {
@@ -37,7 +38,10 @@ export async function getDocumentWithContent(user: CurrentUser, id: string): Pro
       content: true,
       ownerId: true,
       owner: { select: { name: true } },
-      shares: { select: { userId: true } },
+      shares: {
+        select: { userId: true, user: { select: { name: true, email: true } } },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
   if (!row) return null;
@@ -49,6 +53,7 @@ export async function getDocumentWithContent(user: CurrentUser, id: string): Pro
     ownerId: row.ownerId,
     ownerName: row.owner.name,
     sharedWith: row.shares.map((s) => s.userId),
+    collaborators: row.shares.map((s) => ({ id: s.userId, ...s.user })),
   };
   return canView(user, doc) ? doc : null;
 }
