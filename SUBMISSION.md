@@ -11,7 +11,7 @@
 | --- | --- |
 | `README.md` | What it is, demo accounts, reviewer path, local setup, tests, deploy |
 | `ARCHITECTURE.md` | Design decisions, data model, trade-offs, limitations, next steps |
-| `AI_WORKFLOW.md` | How AI tools were used and verified (draft, to be completed by the author) |
+| `AI_WORKFLOW.md` | How AI tools were used, what I corrected, and how I verified the work |
 | `SUBMISSION.md` | This file |
 | `VIDEO_URL.txt` | Link to the walkthrough video |
 
@@ -20,7 +20,7 @@
 | --- | --- |
 | `prisma/schema.prisma` | `User`, `Document` (JSONB `content`), `DocumentShare` (with a `VIEWER` / `EDITOR` role) |
 | `prisma/migrations/20261124213043_init/`, `20261124224606_share_roles/`, `migration_lock.toml` | The two committed migrations (the second adds roles, additively, default `EDITOR`) |
-| `prisma/seed.ts` | 3 demo users, 3 sample documents (one shared Alice → Bob) |
+| `prisma/seed.ts` | 3 demo users, 3 sample documents ("Q3 planning notes" shared by Alice with Bob as Editor and Carol as Viewer) |
 | `prisma.config.ts` | Prisma 7 config (datasource, migrations, seed command) |
 | `src/app/page.tsx` | Dashboard: My documents / Shared with me, create, import |
 | `src/app/signin/page.tsx` | "Sign in as…" |
@@ -66,9 +66,9 @@
 
 ## What is incomplete or limited
 
-See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; last write wins with no real-time updates; content limit of 1 MB (so some large imports are refused); images and tables are dropped on import; no zip-bomb protection; title numbering is cosmetic and not enforced under races. Markdown export (the other stretch option) was not built.
+See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; last write wins with no real-time updates; content limit of 1 MB (so some large imports are refused); images and tables are dropped on import; no zip-bomb protection; title numbering is cosmetic and not enforced under races.
 
-`TODO(Derviş): confirm the live deployment works end to end (migrations applied, seed run once) and update this section if anything differs.`
+The live deployment was checked in the browser: migrations are applied and the seed has been run once. Not verified: mobile/tablet layouts and very large documents.
 
 ## What is next
 
