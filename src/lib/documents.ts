@@ -2,6 +2,7 @@ import "server-only";
 import type { CurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canView, type PermDoc } from "@/lib/permissions";
+import { nextAvailableTitle } from "@/lib/titles";
 
 export type LoadedDocument = PermDoc & { id: string; title: string };
 
@@ -75,4 +76,13 @@ export async function listDocumentsForUser(user: CurrentUser) {
     }),
   ]);
   return { mine, shared };
+}
+
+/**
+ * Title for a NEW document: the wanted title, numbered if the user already OWNS one with that
+ * name ("sample (2)"). Only the user's own documents count, not ones shared with them.
+ */
+export async function uniqueTitleForNewDocument(user: CurrentUser, wanted: string): Promise<string> {
+  const owned = await db.document.findMany({ where: { ownerId: user.id }, select: { title: true } });
+  return nextAvailableTitle(wanted, owned.map((d) => d.title));
 }

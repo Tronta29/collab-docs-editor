@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Prisma } from "@/generated/prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { uniqueTitleForNewDocument } from "@/lib/documents";
 import { convertFile, ImportError, type ImportErrorCode } from "@/lib/import/convert";
 import { MAX_IMPORT_BYTES } from "@/lib/import/limits";
 import { importFileSchema } from "@/lib/schemas";
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
   try {
     const { title, content } = await convertFile(file.name, new Uint8Array(await file.arrayBuffer()));
     const doc = await db.document.create({
-      data: { title, ownerId: user.id, content: content as Prisma.InputJsonValue },
+      data: { title: await uniqueTitleForNewDocument(user, title), ownerId: user.id, content: content as Prisma.InputJsonValue },
       select: { id: true },
     });
     return NextResponse.json({ id: doc.id }, { status: 201 });

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import type { ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getDocumentForUser } from "@/lib/documents";
+import { getDocumentForUser, uniqueTitleForNewDocument } from "@/lib/documents";
 import { canDelete, canRename } from "@/lib/permissions";
 import { createDocumentSchema, deleteDocumentSchema, renameDocumentSchema } from "@/lib/schemas";
 
@@ -18,7 +18,7 @@ export async function createDocument(_prev: ActionState, formData: FormData): Pr
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const doc = await db.document.create({
-    data: { title: parsed.data.title, ownerId: user.id, content: EMPTY_DOC },
+    data: { title: await uniqueTitleForNewDocument(user, parsed.data.title), ownerId: user.id, content: EMPTY_DOC },
     select: { id: true },
   });
   revalidatePath("/");
