@@ -9,7 +9,7 @@ import { MAX_CONTENT_BYTES, updateContentSchema } from "@/lib/schemas";
 const error = (message: string, status: number) => NextResponse.json({ error: message }, { status });
 
 // Autosave endpoint. Content only: renaming goes through the owner-only rename action.
-export async function PATCH(request: Request, ctx: RouteContext<"/api/documents/[id]">) {
+async function handlePATCH(request: Request, ctx: RouteContext<"/api/documents/[id]">) {
   const user = await getCurrentUser();
   if (!user) return error("You're signed out. Sign in again.", 401);
 
@@ -38,4 +38,13 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/documents/
     data: { content: parsed.data.content as Prisma.InputJsonValue },
   });
   return NextResponse.json({ ok: true });
+}
+
+export async function PATCH(request: Request, ctx: RouteContext<"/api/documents/[id]">) {
+  try {
+    return await handlePATCH(request, ctx);
+  } catch (e) {
+    console.error("Autosave failed", e);
+    return error("Couldn't save right now. Please try again.", 500);
+  }
 }

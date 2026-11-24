@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Docs: a lightweight collaborative document editor
 
-## Getting Started
+A small Google Docs-style app: create and edit rich-text documents in the browser, import `.txt` / `.md` / `.docx` files, and share documents with other users by email.
 
-First, run the development server:
+**Live demo:** `TODO: add Vercel URL`
+
+Built with Next.js (App Router), TypeScript (strict), Tiptap, Prisma + PostgreSQL (Neon), Tailwind CSS, Zod and Vitest.
+
+## Demo accounts
+
+Authentication is **mocked** on purpose. There are no passwords: open the app and use **Sign in as…**.
+
+| Name  | Email            |
+| ----- | ---------------- |
+| Alice | alice@demo.com   |
+| Bob   | bob@demo.com     |
+| Carol | carol@demo.com   |
+
+The seed data gives Alice two documents (one shared with Bob) and Bob one private document.
+
+## Two-minute reviewer path
+
+1. Sign in as **Alice**. You land on the dashboard: **My documents** and **Shared with me**.
+2. Click **New document**. In the editor, type something and try bold / italic / underline, H1-H3 and both list types. Watch the status change: *Unsaved changes → Saving… → Saved*. Refresh: everything is still there.
+3. Go back to the dashboard and use **Import file** with a file from [`samples/`](samples) (`sample.txt`, `sample.md`, `sample.docx`). It becomes a new, editable document.
+4. Open a document you own, click **Share**, enter `bob@demo.com`. Try `alice@demo.com`, an unknown email, and `bob@demo.com` again to see the error messages.
+5. Click **Switch user** and sign in as **Bob**. The document is under **Shared with me** (with Alice as owner). Bob can edit it but cannot rename, share or delete it.
+6. Sign in as **Carol** and open the same URL: you get a 404, never the data.
+
+## Features
+
+- Create, rename, delete, edit and reopen documents. Content is stored as Tiptap JSON in a Postgres JSONB column, so formatting persists.
+- Formatting: bold, italic, underline, H1/H2/H3, bulleted and numbered lists, undo/redo.
+- Autosave 1.5 s after you stop typing, with a visible *Saving… / Saved / Error (retry)* status and a warning before leaving with unsaved changes.
+- File import into a **new** document: `.txt`, `.md`, `.docx`, **max 2 MB**. Anything else is rejected with a clear message (wrong type, empty file, corrupt file, too large).
+- Sharing by email. One owner per document. Shared users can view and edit content; only the owner can rename, share, unshare or delete. Users without access get a 404.
+- Duplicate titles on create/import are numbered like Google Drive: `sample`, `sample (2)`, `sample (3)`.
+
+## Local setup
+
+Requirements: **Node 20.9+** (developed on Node 24) and a PostgreSQL database. A free [Neon](https://neon.tech) project is the easiest, but any Postgres works.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Install (also runs `prisma generate`)
+npm install
+
+# 2. Configure the database
+cp .env.example .env
+#    then edit .env:
+#    DATABASE_URL = pooled connection string (Neon: the host with "-pooler")
+#    DIRECT_URL   = direct connection string (used for migrations)
+#    With a plain local Postgres, use the same URL for both.
+
+# 3. Create the tables
+npm run db:deploy
+
+# 4. Load the demo users and sample documents
+npm run db:seed        # WARNING: wipes all users and documents first
+
+# 5. Run
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env` is git-ignored. Never commit real connection strings.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tests and checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test               # Vitest, 58 tests, no database needed
+npm run typecheck
+npm run lint
+npm run build          # applies pending migrations, then builds (needs the database)
+npm run build:app      # build only, no migrations
+```
 
-## Learn More
+The tests cover the pure logic: permissions (owner / shared / stranger), file-import conversion (including a real `.docx` fixture and rejection of bad input), share validation, and title numbering.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel + Neon
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a Neon project and copy both connection strings (pooled and direct).
+2. Push this repo to GitHub and import it in Vercel (framework: Next.js, default settings).
+3. Add two environment variables in Vercel: `DATABASE_URL` (pooled) and `DIRECT_URL` (direct).
+4. Deploy. The build command is `npm run build`, which runs `prisma migrate deploy` (applies only committed migrations, safe to repeat) and then `next build`.
+5. **Seed once, manually**, so the demo accounts exist. The seed is never run automatically. From your machine, point `.env` at the production database, run `npm run db:seed`, then restore your local `.env`. Remember the seed deletes existing data.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Imports are capped at 2 MB, which fits under Vercel's request body limit for serverless functions.
 
-## Deploy on Vercel
+## Import details
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Type    | How it is converted                                                       |
+| ------- | ------------------------------------------------------------------------- |
+| `.txt`  | HTML-escaped. Blank lines separate paragraphs; single newlines become line breaks. |
+| `.md`   | `marked`. Raw HTML in the Markdown is dropped.                            |
+| `.docx` | `mammoth`. Headings, bold/italic/underline and lists are kept; images and tables are not. |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The HTML is converted to Tiptap JSON using the same extension list as the editor, so an imported document is identical in structure to one typed by hand. The file name (without extension) becomes the title. The type is checked by extension **and** content (for example, a `.docx` must really be a Word file). A converted document must stay under about 1 MB so it can still be autosaved.
+
+## Project layout
+
+```
+prisma/            schema, migration, seed
+samples/           files to try the import with
+src/app/           pages (dashboard, sign-in, editor) and API routes (autosave, import)
+src/components/    editor, toolbar, share panel, forms
+src/lib/           permissions.ts (all access rules), sharing.ts, titles.ts,
+                   import/convert.ts, server actions, Zod schemas, data access
+src/tests/         Vitest tests
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for design decisions, trade-offs and known limitations.

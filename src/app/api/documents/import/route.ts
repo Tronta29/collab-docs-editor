@@ -13,7 +13,7 @@ const STATUS: Record<ImportErrorCode, number> = { unsupported: 415, too_large: 4
 const tooLarge = () => error(`The file is too large. The limit is ${MAX_IMPORT_BYTES / 1024 / 1024} MB.`, 413);
 
 // Creates a NEW document owned by the current user from an uploaded .txt / .md / .docx file.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const user = await getCurrentUser();
   if (!user) return error("You're signed out. Sign in again.", 401);
 
@@ -42,6 +42,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ id: doc.id }, { status: 201 });
   } catch (e) {
     if (e instanceof ImportError) return error(e.message, STATUS[e.code]);
+    console.error("Import failed", e);
+    return error("Something went wrong while importing the file.", 500);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    return await handlePOST(request);
+  } catch (e) {
     console.error("Import failed", e);
     return error("Something went wrong while importing the file.", 500);
   }
