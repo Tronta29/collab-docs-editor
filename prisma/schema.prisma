@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id     String          @id @default(cuid())
+  email  String          @unique
+  name   String
+  owned  Document[]      @relation("Owner")
+  shares DocumentShare[]
+}
+
+model Document {
+  id        String          @id @default(cuid())
+  title     String
+  content   Json // Tiptap JSON, stored as JSONB
+  ownerId   String
+  owner     User            @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  shares    DocumentShare[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([ownerId])
+}
+
+// A row means "this user can view and edit the document". The owner is never a row here.
+model DocumentShare {
+  id         String   @id @default(cuid())
+  documentId String
+  userId     String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, userId])
+  @@index([userId])
+}

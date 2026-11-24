@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
+// Cache Components is intentionally off: every page here depends on the signed-in
+// user's cookie, so there is nothing useful to prerender or cache.
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {
