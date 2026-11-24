@@ -1,19 +1,14 @@
 "use client";
 
-import { useActionState, useRef } from "react";
-import type { ActionState } from "@/lib/action-state";
+import { useActionState } from "react";
 import { createDocument } from "@/lib/document-actions";
 
+// On success the action redirects to the new document's editor.
 export function CreateDocumentForm() {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState(async (prev: ActionState, fd: FormData) => {
-    const result = await createDocument(prev, fd);
-    if (result.ok) formRef.current?.reset();
-    return result;
-  }, {});
+  const [state, action, pending] = useActionState(createDocument, {});
 
   return (
-    <form ref={formRef} action={action} className="flex flex-wrap items-center gap-2">
+    <form action={action} className="flex flex-wrap items-center gap-2">
       <input
         name="title"
         placeholder="Untitled document"

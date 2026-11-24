@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -16,11 +17,12 @@ export async function createDocument(_prev: ActionState, formData: FormData): Pr
   const parsed = createDocumentSchema.safeParse({ title: formData.get("title") ?? "" });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  await db.document.create({
+  const doc = await db.document.create({
     data: { title: parsed.data.title, ownerId: user.id, content: EMPTY_DOC },
+    select: { id: true },
   });
   revalidatePath("/");
-  return { ok: true };
+  redirect(`/docs/${doc.id}`);
 }
 
 export async function renameDocument(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -34,6 +36,7 @@ export async function renameDocument(_prev: ActionState, formData: FormData): Pr
 
   await db.document.update({ where: { id: doc.id }, data: { title: parsed.data.title } });
   revalidatePath("/");
+  revalidatePath(`/docs/${doc.id}`);
   return { ok: true };
 }
 

@@ -25,7 +25,35 @@ export async function getDocumentForUser(user: CurrentUser, id: string): Promise
   return canView(user, doc) ? doc : null;
 }
 
-const summary = { id: true, title: true, updatedAt: true } as const;
+export type DocumentWithContent = LoadedDocument & { content: unknown; ownerName: string };
+
+/** Same access rule as getDocumentForUser, but also loads the content (for the editor page). */
+export async function getDocumentWithContent(user: CurrentUser, id: string): Promise<DocumentWithContent | null> {
+  const row = await db.document.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      ownerId: true,
+      owner: { select: { name: true } },
+      shares: { select: { userId: true } },
+    },
+  });
+  if (!row) return null;
+
+  const doc: DocumentWithContent = {
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    ownerId: row.ownerId,
+    ownerName: row.owner.name,
+    sharedWith: row.shares.map((s) => s.userId),
+  };
+  return canView(user, doc) ? doc : null;
+}
+
+const summary ={ id: true, title: true, updatedAt: true } as const;
 
 /** Dashboard lists. Scoped by the user's id in the query itself. */
 export async function listDocumentsForUser(user: CurrentUser) {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { OwnerActions } from "@/components/OwnerActions";
 import type { listDocumentsForUser } from "@/lib/documents";
@@ -28,7 +29,9 @@ export function DocumentLists({ mine, shared }: Lists) {
         items={mine.map((d) => (
           <li key={d.id} className="flex items-center justify-between gap-4 px-4 py-3">
             <div className="min-w-0">
-              <p className="truncate font-medium">{d.title}</p>
+              <Link href={`/docs/${d.id}`} className="block truncate font-medium hover:underline">
+                {d.title}
+              </Link>
               <p className="text-xs text-gray-500">
                 Edited {formatDate(d.updatedAt)}
                 {d.shares.length > 0 && ` · Shared with ${d.shares.length} ${d.shares.length === 1 ? "person" : "people"}`}
@@ -43,7 +46,9 @@ export function DocumentLists({ mine, shared }: Lists) {
         empty="Nothing has been shared with you yet."
         items={shared.map((d) => (
           <li key={d.id} className="px-4 py-3">
-            <p className="truncate font-medium">{d.title}</p>
+            <Link href={`/docs/${d.id}`} className="block truncate font-medium hover:underline">
+              {d.title}
+            </Link>
             <p className="text-xs text-gray-500">
               Owner: {d.owner.name} · Edited {formatDate(d.updatedAt)}
             </p>

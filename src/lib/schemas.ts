@@ -29,3 +29,14 @@ export const renameDocumentSchema = z.object({
 export const deleteDocumentSchema = z.object({
   id: z.string().min(1),
 });
+
+export const MAX_CONTENT_BYTES = 1_000_000;
+
+// Structural check only: a Tiptap doc node whose children are typed nodes. The editor's
+// own schema is the source of truth for what's valid inside.
+const tiptapDocSchema = z.looseObject({
+  type: z.literal("doc"),
+  content: z.array(z.looseObject({ type: z.string() })).optional(),
+});
+
+export const updateContentSchema = z.object({ content: tiptapDocSchema });
