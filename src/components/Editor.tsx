@@ -14,8 +14,11 @@ const AUTOSAVE_DELAY_MS = 1500;
  * latest content and loops until the server has the newest version.
  * Only one request is in flight at a time so older content can't overwrite newer content.
  * Last write wins: there is no conflict detection between people editing the same doc.
+ *
+ * `readOnly` (viewers): the editor isn't editable, there is no toolbar and nothing is ever saved.
+ * The server enforces this too: the autosave endpoint rejects viewers with 403.
  */
-export function Editor({ docId, initialContent }: { docId: string; initialContent: JSONContent }) {
+export function Editor({ docId, initialContent, readOnly = false }: { docId: string; initialContent: JSONContent; readOnly?: boolean }) {
   const [state, setState] = useState<SaveState>("saved");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -69,12 +72,14 @@ export function Editor({ docId, initialContent }: { docId: string; initialConten
     // back right after the last character is deleted.
     extensions: [...editorExtensions, Placeholder.configure({ placeholder: "Start writing…" })],
     content: initialContent,
+    editable: !readOnly,
     immediatelyRender: false, // avoids an SSR hydration mismatch
     editorProps: { attributes: { class: "doc-content", "aria-label": "Document content" } },
     onCreate: ({ editor }) => {
       editorRef.current = editor;
     },
     onUpdate: () => {
+      if (readOnly) return;
       version.current += 1;
       setState("unsaved");
       scheduleSave();
@@ -106,15 +111,19 @@ export function Editor({ docId, initialContent }: { docId: string; initialConten
   return (
     <div>
       <div className="mb-2 flex justify-end">
-        <SaveStatus state={state} errorMessage={errorMessage} onRetry={() => void save()} />
+        {readOnly ? (
+          <span className="rounded-full bg-gray-200 px-3 py-0.5 text-sm font-medium text-gray-700">View only</span>
+        ) : (
+          <SaveStatus state={state} errorMessage={errorMessage} onRetry={() => void save()} />
+        )}
       </div>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <Toolbar editor={editor} />
+        {!readOnly && <Toolbar editor={editor} />}
         {/* Clicking the empty space around the text (not the text itself) focuses the end. */}
         <div
-          className="cursor-text"
+          className={readOnly ? "" : "cursor-text"}
           onClick={(e) => {
-            if (e.target === e.currentTarget) editor.commands.focus("end");
+            if (!readOnly && e.target === e.currentTarget) editor.commands.focus("end");
           }}
         >
           <EditorContent editor={editor} />

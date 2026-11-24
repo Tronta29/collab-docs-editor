@@ -7,7 +7,7 @@ import { ShareDialog } from "@/components/ShareDialog";
 import { TitleForm } from "@/components/TitleForm";
 import { requireUser } from "@/lib/auth";
 import { getDocumentWithContent } from "@/lib/documents";
-import { canRename, canShare } from "@/lib/permissions";
+import { canEdit, canRename, canShare } from "@/lib/permissions";
 
 export default async function DocumentPage({ params }: PageProps<"/docs/[id]">) {
   const user = await requireUser();
@@ -31,7 +31,10 @@ export default async function DocumentPage({ params }: PageProps<"/docs/[id]">) 
             ) : (
               <>
                 <h1 className="px-2 py-1 text-2xl font-semibold">{doc.title}</h1>
-                <p className="px-2 text-sm text-gray-500">Shared by {doc.ownerName}. You can edit, but only they can rename it.</p>
+                <p className="px-2 text-sm text-gray-500">
+                  Shared by {doc.ownerName}.{" "}
+                  {canEdit(user, doc) ? "You can edit, but only they can rename it." : "You have view-only access."}
+                </p>
               </>
             )}
           </div>
@@ -39,7 +42,7 @@ export default async function DocumentPage({ params }: PageProps<"/docs/[id]">) 
             <ShareDialog documentId={doc.id} ownerName={doc.ownerName} collaborators={doc.collaborators} />
           )}
         </div>
-        <Editor docId={doc.id} initialContent={doc.content as JSONContent} />
+        <Editor docId={doc.id} initialContent={doc.content as JSONContent} readOnly={!canEdit(user, doc)} />
       </main>
     </>
   );

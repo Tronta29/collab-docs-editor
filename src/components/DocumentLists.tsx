@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { OwnerActions } from "@/components/OwnerActions";
 import type { listDocumentsForUser } from "@/lib/documents";
+import { ROLE_LABEL } from "@/lib/sharing";
 
 type Lists = Awaited<ReturnType<typeof listDocumentsForUser>>;
 
@@ -49,8 +50,16 @@ export function DocumentLists({ mine, shared }: Lists) {
             <Link href={`/docs/${d.id}`} className="block truncate font-medium hover:underline">
               {d.title}
             </Link>
-            <p className="text-xs text-gray-500">
-              Owner: {d.owner.name} · Edited {formatDate(d.updatedAt)}
+            <p className="flex flex-wrap items-center gap-x-2 text-xs text-gray-500">
+              <span>Owner: {d.owner.name}</span>
+              <span
+                className={`rounded-full px-2 py-0.5 font-medium ${
+                  d.role === "EDITOR" ? "bg-blue-100 text-blue-800" : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {ROLE_LABEL[d.role]}
+              </span>
+              <span>Edited {formatDate(d.updatedAt)}</span>
             </p>
           </li>
         ))}

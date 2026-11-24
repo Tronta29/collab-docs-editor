@@ -19,7 +19,7 @@ async function main() {
   await db.document.deleteMany();
   await db.user.deleteMany();
 
-  const [alice, bob] = await Promise.all(
+  const [alice, bob, carol] = await Promise.all(
     [
       { email: "alice@demo.com", name: "Alice" },
       { email: "bob@demo.com", name: "Bob" },
@@ -47,9 +47,14 @@ async function main() {
       content: doc(
         h(2, "Goals"),
         { type: "orderedList", content: [li("Ship the editor"), li("Write the docs")] },
-        p(text("Bob can edit this document, but only Alice can rename, share or delete it.")),
+        p(text("Bob is an Editor and can change this document. Carol is a Viewer and can only read it. Only Alice can rename, share or delete it.")),
       ),
-      shares: { create: { userId: bob.id } },
+      shares: {
+        create: [
+          { userId: bob.id, role: "EDITOR" },
+          { userId: carol.id, role: "VIEWER" },
+        ],
+      },
     },
   });
 
@@ -61,7 +66,7 @@ async function main() {
     },
   });
 
-  console.log("Seeded 3 users and 3 documents (1 shared: Alice -> Bob).");
+  console.log("Seeded 3 users and 3 documents (1 shared: Alice -> Bob as Editor, Carol as Viewer).");
 }
 
 main()

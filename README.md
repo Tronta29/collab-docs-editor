@@ -1,6 +1,6 @@
 # Docs: a lightweight collaborative document editor
 
-A small Google Docs-style app: create and edit rich-text documents in the browser, import `.txt` / `.md` / `.docx` files, and share documents with other users by email.
+A small Google Docs-style app: create and edit rich-text documents in the browser, import `.txt` / `.md` / `.docx` files, and share documents with other users by email as **Editor** or **Viewer**.
 
 **Live demo:** `TODO: add Vercel URL`
 
@@ -16,16 +16,17 @@ Authentication is **mocked** on purpose. There are no passwords: open the app an
 | Bob   | bob@demo.com     |
 | Carol | carol@demo.com   |
 
-The seed data gives Alice two documents (one shared with Bob) and Bob one private document.
+The seed data gives Alice two documents and Bob one private document. Alice's **"Q3 planning notes"** is shared with **Bob as Editor** and **Carol as Viewer**, so you can see both roles right away: sign in as Bob and you can edit it, sign in as Carol and it opens read-only.
 
 ## Two-minute reviewer path
 
 1. Sign in as **Alice**. You land on the dashboard: **My documents** and **Shared with me**.
 2. Click **New document**. In the editor, type something and try bold / italic / underline, H1-H3 and both list types. Watch the status change: *Unsaved changes → Saving… → Saved*. Refresh: everything is still there.
 3. Go back to the dashboard and use **Import file** with a file from [`samples/`](samples) (`sample.txt`, `sample.md`, `sample.docx`). It becomes a new, editable document.
-4. Open a document you own, click **Share**, enter `bob@demo.com`. Try `alice@demo.com`, an unknown email, and `bob@demo.com` again to see the error messages.
-5. Click **Switch user** and sign in as **Bob**. The document is under **Shared with me** (with Alice as owner). Bob can edit it but cannot rename, share or delete it.
-6. Sign in as **Carol** and open the same URL: you get a 404, never the data.
+4. Open a document you created in step 2 (Q3 planning notes is already shared, see above) and click **Share**. Share it with `bob@demo.com` as **Editor**, then with `carol@demo.com` as **Viewer**. Try `alice@demo.com`, an unknown email and a duplicate to see the error messages, and use the role dropdown next to a person to change their role.
+5. Click **Switch user** and sign in as **Bob**. The document is under **Shared with me** with an *Editor* badge and Alice as owner. Bob can edit it but cannot rename, share or delete it.
+6. Sign in as **Carol**. The same document shows a *Viewer* badge. It opens read-only ("View only", no toolbar, nothing is saved), and the server rejects writes from her.
+7. Back as **Alice**, remove Carol from the **Share** panel. As Carol, reload the document URL: you get a 404, never the data.
 
 ## Features
 
@@ -33,7 +34,7 @@ The seed data gives Alice two documents (one shared with Bob) and Bob one privat
 - Formatting: bold, italic, underline, H1/H2/H3, bulleted and numbered lists, undo/redo.
 - Autosave 1.5 s after you stop typing, with a visible *Saving… / Saved / Error (retry)* status and a warning before leaving with unsaved changes.
 - File import into a **new** document: `.txt`, `.md`, `.docx`, **max 2 MB**. Anything else is rejected with a clear message (wrong type, empty file, corrupt file, too large).
-- Sharing by email. One owner per document. Shared users can view and edit content; only the owner can rename, share, unshare or delete. Users without access get a 404.
+- Sharing by email with **roles**. One owner per document. *Editors* can view and edit content; *Viewers* can only read (read-only editor, no toolbar, writes rejected by the server with 403). Only the owner can rename, share, change roles, remove people or delete. Users without access get a 404.
 - Duplicate titles on create/import are numbered like Google Drive: `sample`, `sample (2)`, `sample (3)`.
 
 ## Local setup
@@ -66,14 +67,14 @@ npm run dev            # http://localhost:3000
 ## Tests and checks
 
 ```bash
-npm test               # Vitest, 58 tests, no database needed
+npm test               # Vitest, 88 tests, no database needed
 npm run typecheck
 npm run lint
 npm run build          # applies pending migrations, then builds (needs the database)
 npm run build:app      # build only, no migrations
 ```
 
-The tests cover the pure logic: permissions (owner / shared / stranger), file-import conversion (including a real `.docx` fixture and rejection of bad input), share validation, and title numbering.
+The tests cover the pure logic: permissions (owner / editor / viewer / stranger), file-import conversion (including a real `.docx` fixture and rejection of bad input), share and role-change validation, and title numbering.
 
 ## Deploy to Vercel + Neon
 

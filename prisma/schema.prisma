@@ -28,14 +28,21 @@ model Document {
   @@index([ownerId])
 }
 
-// A row means "this user can view and edit the document". The owner is never a row here.
+enum ShareRole {
+  VIEWER
+  EDITOR
+}
+
+// A row means "this user has access to the document" with the given role: VIEWER can only
+// read, EDITOR can also edit content. The owner is never a row here.
 model DocumentShare {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   documentId String
   userId     String
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  role       ShareRole @default(EDITOR)
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
 
   @@unique([documentId, userId])
   @@index([userId])

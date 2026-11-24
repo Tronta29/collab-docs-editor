@@ -16,7 +16,8 @@ async function handlePATCH(request: Request, ctx: RouteContext<"/api/documents/[
   const { id } = await ctx.params;
   const doc = await getDocumentForUser(user, id);
   if (!doc) return error("Document not found.", 404);
-  if (!canEdit(user, doc)) return error("You don't have permission to edit this document.", 403);
+  // Viewers can read but never write, even when calling this endpoint directly.
+  if (!canEdit(user, doc)) return error("You have view-only access to this document.", 403);
 
   const raw = await request.text();
   if (Buffer.byteLength(raw) > MAX_CONTENT_BYTES) {

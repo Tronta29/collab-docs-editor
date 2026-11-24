@@ -30,14 +30,23 @@ export const deleteDocumentSchema = z.object({
   id: z.string().min(1),
 });
 
+export const shareRoleSchema = z.enum(["VIEWER", "EDITOR"], { error: "Choose Viewer or Editor." });
+
 export const shareDocumentSchema = z.object({
   documentId: z.string().min(1),
+  role: shareRoleSchema,
   email: z
     .string()
     .trim()
     .min(1, "Enter an email address.")
     .toLowerCase()
     .pipe(z.email("Enter a valid email address.")),
+});
+
+export const updateShareRoleSchema = z.object({
+  documentId: z.string().min(1),
+  userId: z.string().min(1),
+  role: shareRoleSchema,
 });
 
 export const unshareDocumentSchema = z.object({

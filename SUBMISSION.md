@@ -18,8 +18,8 @@
 ### Source
 | Path | Contents |
 | --- | --- |
-| `prisma/schema.prisma` | `User`, `Document` (JSONB `content`), `DocumentShare` |
-| `prisma/migrations/20261124213043_init/`, `migration_lock.toml` | The single committed migration |
+| `prisma/schema.prisma` | `User`, `Document` (JSONB `content`), `DocumentShare` (with a `VIEWER` / `EDITOR` role) |
+| `prisma/migrations/20261124213043_init/`, `20261124224606_share_roles/`, `migration_lock.toml` | The two committed migrations (the second adds roles, additively, default `EDITOR`) |
 | `prisma/seed.ts` | 3 demo users, 3 sample documents (one shared Alice → Bob) |
 | `prisma.config.ts` | Prisma 7 config (datasource, migrations, seed command) |
 | `src/app/page.tsx` | Dashboard: My documents / Shared with me, create, import |
@@ -30,8 +30,8 @@
 | `src/app/layout.tsx`, `globals.css`, `favicon.ico` | Layout, light theme, editor content styles |
 | `src/app/error.tsx`, `global-error.tsx`, `not-found.tsx` | Friendly error and 404 pages |
 | `src/components/` | `Editor`, `Toolbar`, `SaveStatus`, `TitleForm`, `ShareDialog`, `ImportForm`, `CreateDocumentForm`, `DocumentLists`, `OwnerActions`, `Header` |
-| `src/lib/permissions.ts` | All access rules (pure) |
-| `src/lib/sharing.ts` | Share/unshare validation (pure) |
+| `src/lib/permissions.ts` | All access rules, including roles (pure) |
+| `src/lib/sharing.ts` | Share / change-role / unshare validation (pure) |
 | `src/lib/titles.ts` | Title numbering (pure) |
 | `src/lib/import/convert.ts`, `limits.ts` | Import conversion (pure) and limits |
 | `src/lib/auth.ts`, `db.ts`, `documents.ts` | Current user from cookie, Prisma client, access-checked data loading |
@@ -39,7 +39,7 @@
 | `src/lib/schemas.ts`, `editor-extensions.ts` | Zod schemas, shared Tiptap extension list |
 
 ### Tests
-`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, plus `vitest.config.mts`: 58 tests, no database required.
+`src/tests/permissions.test.ts`, `convert.test.ts`, `sharing.test.ts`, `titles.test.ts`, plus `vitest.config.mts`: 88 tests, no database required.
 
 ### Samples
 `samples/sample.txt`, `samples/sample.md`, `samples/sample.docx`: files to try the import with.
@@ -56,17 +56,18 @@
 - Bold, italic, underline, H1-H3, bulleted/numbered lists, undo/redo; autosave with *Saving… / Saved / Error (retry)*; leave-page warning.
 - Import `.txt`, `.md`, `.docx` (max 2 MB) into a new document, with type, content, size and empty-file checks and sanitization.
 - Mock sign-in with three seeded users; the current user always comes from an httpOnly cookie on the server.
-- Sharing by email with an "access list" and Remove; owner-only rename/share/delete; shared users edit content; strangers get 404.
+- Sharing by email with **Viewer / Editor roles**: role dropdown when sharing, an access list where the owner can change a role or Remove; viewers get a read-only editor (and a 403 from the API if they try to write); owner-only rename/share/delete; "Shared with me" shows your role; strangers get 404.
+- The optional stretch item: **viewer/editor roles** (Markdown export was not built).
 - Zod validation on all inputs, with clear messages for empty titles, oversized or corrupt files, unknown users, self-shares and duplicate shares.
 - Friendly error and 404 pages; database failures show a readable message instead of a stack trace.
-- 58 passing tests, type check, lint and production build all clean.
+- 88 passing tests, type check, lint and production build all clean.
 
 ## What is incomplete or limited
 
-See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; last write wins with no real-time updates; content limit of 1 MB (so some large imports are refused); images and tables are dropped on import; no zip-bomb protection; title numbering is cosmetic and not enforced under races. The optional stretch item (Markdown export or viewer/editor roles) was not built.
+See "Known limitations" in `ARCHITECTURE.md`. In short: mock auth is unsigned; last write wins with no real-time updates; content limit of 1 MB (so some large imports are refused); images and tables are dropped on import; no zip-bomb protection; title numbering is cosmetic and not enforced under races. Markdown export (the other stretch option) was not built.
 
 `TODO(Derviş): confirm the live deployment works end to end (migrations applied, seed run once) and update this section if anything differs.`
 
 ## What is next
 
-With 2-4 more hours: viewer/editor roles, safer concurrent editing (version check or Yjs), real authentication, Markdown export, integration/E2E tests, and import hardening. Details are in `ARCHITECTURE.md`.
+With 2-4 more hours: safer concurrent editing (version check or Yjs), real authentication, Markdown export, integration/E2E tests, and import hardening. Details are in `ARCHITECTURE.md`.
