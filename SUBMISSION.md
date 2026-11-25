@@ -1,7 +1,7 @@
 # Submission
 
 - **Live URL:** https://collab-docs-editor29.vercel.app/
-- **Walkthrough video:** see [`VIDEO_URL.txt`](VIDEO_URL.txt) (`TODO: add link`)
+- **Walkthrough video:** https://youtu.be/vgNmqEJ7lMA (also in [`VIDEO_URL.txt`](VIDEO_URL.txt))
 - **Demo accounts:** alice@demo.com, bob@demo.com, carol@demo.com (no password, "Sign in as…")
 
 ## What is included

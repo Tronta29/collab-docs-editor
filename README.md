@@ -4,6 +4,8 @@ A small Google Docs-style app: create and edit rich-text documents in the browse
 
 **Live demo:** https://collab-docs-editor29.vercel.app/
 
+**Walkthrough video:** https://youtu.be/vgNmqEJ7lMA
+
 Built with Next.js (App Router), TypeScript (strict), Tiptap, Prisma + PostgreSQL (Neon), Tailwind CSS, Zod and Vitest.
 
 ## Demo accounts

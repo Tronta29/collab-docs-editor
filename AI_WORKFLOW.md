@@ -5,7 +5,9 @@
 - **Claude Code (in VS Code):** implementation. It wrote the code, ran the type checker, linter, tests and builds, and ran `curl` and headless-browser checks against local builds.
 - **Claude (chat), in a separate session:** planning, choosing the stack and the scope cuts, writing the prompt for each phase, and reviewing each phase report before I tested it. Having a second session review the first one's output gave me a "second pair of eyes" that had not written the code.
 
-No other AI tools were used.
+No other AI tools were used for the code.
+
+The walkthrough video narration uses an ElevenLabs clone of my own voice because my microphone was faulty; the script is mine. Claude assembled the screen recordings and narration into the final video.
 
 ## How I worked
 
